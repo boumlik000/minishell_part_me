@@ -5,7 +5,11 @@ CFLAGS = -Wall -Wextra -Werror -g3 -fsanitize=address
 LIBFT = ./includes/libft/libft.a
 
 SRCS = minishell.c\
-		 free.c builts_in.c utils.c
+	free.c builts_in.c utils.c \
+	./built_ins/echo.c\
+	./built_ins/exit.c\
+	./built_ins/pwd.c \
+	./garbage_utiles.c
 
 OBJS = $(SRCS:.c=.o)
 

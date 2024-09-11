@@ -1,6 +1,6 @@
 #include "minishell.h"
 
-
+int last_exit_status;
 
 char **pare_cmd(char *cmd)
 {
@@ -27,16 +27,27 @@ int main(int ac,char **av)
     (void)ac;
     (void)av;
     int status;
+    t_garbage *garbage;
+
+    garbage = NULL;
+
     while(1)
     {
         char *cmd = readline(">>> ");
         if (!cmd)
             break;
         char **splited = pare_cmd(cmd);
+
         status = exec_cmd(splited);
         // exit(status);
         // print_splited(splited);
-        free_arr(splited);
-    }
 
+
+        
+        ft_grapadd_back(&garbage, ft_grapnew(cmd));
+
+        free_arr(splited);
+        // free(cmd);
+    }
+    ft_garbage_free(garbage);
 }
