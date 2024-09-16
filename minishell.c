@@ -16,38 +16,45 @@ char **pare_cmd(char *cmd)
 //     }
 // }
 
-int exec_cmd(char **arr)
+int exec_cmd(char **arr,t_shell *shell)
 {
-    exec_built_in(arr);
+    
+    exec_built_in(arr,shell);
     return (0);
 }
 
-int main(int ac,char **av)
+
+void init_shell(t_shell *shell, char **env)
+{
+    ft_bzero(shell, sizeof(t_shell));
+    shell->env = cp_env_in_liste(env,shell);
+    shell->garbage = NULL;
+}
+
+int main(int ac, char **av, char **env)
 {
     (void)ac;
     (void)av;
     int status;
-    t_garbage *garbage;
+    t_shell shell;
 
-    garbage = NULL;
+    init_shell(&shell, env);
 
     while(1)
     {
         char *cmd = readline(">>> ");
         if (!cmd)
             break;
-        char **splited = pare_cmd(cmd);
-
-        status = exec_cmd(splited);
-        // exit(status);
-        // print_splited(splited);
-
-
         
-        ft_grapadd_back(&garbage, ft_grapnew(cmd));
-
+        char **splited = pare_cmd(cmd);
+        status = exec_cmd(splited, &shell);
+        
+        ft_grapadd_back(&shell.garbage, ft_grapnew(cmd));
         free_arr(splited);
-        // free(cmd);
     }
-    ft_garbage_free(garbage);
+
+    free_env(&shell);
+    ft_garbage_free(shell.garbage);
+    // rl_clear_history();
+    return 0;
 }

@@ -9,6 +9,8 @@ SRCS = minishell.c\
 	./built_ins/echo.c\
 	./built_ins/exit.c\
 	./built_ins/pwd.c \
+	./built_ins/env.c \
+	./built_ins/cd.c \
 	./garbage_utiles.c
 
 OBJS = $(SRCS:.c=.o)

@@ -6,7 +6,7 @@
 /*   By: mboumlik <mboumlik@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/06 10:14:22 by mboumlik          #+#    #+#             */
-/*   Updated: 2024/09/06 10:35:54 by mboumlik         ###   ########.fr       */
+/*   Updated: 2024/09/16 10:03:14 by mboumlik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,16 +84,24 @@ void	ft_grapadd_back(t_garbage **lst, t_garbage *new)
 // free the linked list allocated by the garbage collector
 // garbage: a parameter bla bla
 
+
 void ft_garbage_free(t_garbage *garbage)
 {
-	t_garbage *garp_next;
+    t_garbage *current = garbage;
+    t_garbage *next;
 
-	garp_next = NULL;
-	while (garbage)
-	{
-		garp_next = garbage->next;
-		free(garbage->ptr);
-		free(garbage);
-		garbage = garp_next;
-	}
+    while (current)
+    {
+        next = current->next;
+        free(current->ptr);
+        free(current);
+        current = next;
+    }
 }
+
+// void cleanup_readline()
+// {
+//     // rl_clear_history();
+//     // rl_free_line_state();
+//     // rl_cleanup_after_signal();
+// }
