@@ -107,21 +107,33 @@ void make_pipe(char **args, char **env)
     int i = 0;
     int pipe_count = 0;
     pid_t pids[1024]; // Assuming a maximum of 1024 piped commands
+    int pipes[1024][2];
+    int cmd_count = 0;
 
+    // First, create all the pipes
     while (args[i])
     {
-        int j = i;
-        while (args[j] && strcmp(args[j], "|") != 0)
-            j++;
-        int has_pipe = (args[j] && strcmp(args[j], "|") == 0);
-        printf("[%d][%d]||",has_pipe,j);
-        int fd[2];
-        if (has_pipe && pipe(fd) == -1)
+        if (strcmp(args[i], "|") == 0)
         {
-            perror("pipe");
-            exit(1);
+            if (pipe(pipes[pipe_count]) == -1)
+            {
+                perror("pipe");
+                exit(1);
+            }
+            pipe_count++;
         }
+        else if (strcmp(args[i], "|") != 0)
+        {
+            cmd_count++;
+        }
+        i++;
+    }
 
+    // Now create all the child processes
+    i = 0;
+    int cmd_index = 0;
+    while (cmd_index < cmd_count)
+    {
         pid_t pid = fork();
         if (pid == -1)
         {
@@ -130,11 +142,31 @@ void make_pipe(char **args, char **env)
         }
         if (pid == 0)
         {
-            if (has_pipe)
+            // Child process
+            if (cmd_index > 0)
             {
-                args[j] = NULL;
-                set_dup(has_pipe, fd, STDOUT_FILENO);
+                // Not the first command, read from previous pipe
+                dup2(pipes[cmd_index - 1][0], STDIN_FILENO);
             }
+            if (cmd_index < cmd_count - 1)
+            {
+                // Not the last command, write to next pipe
+                dup2(pipes[cmd_index][1], STDOUT_FILENO);
+            }
+
+            // Close all pipe file descriptors
+            for (int j = 0; j < pipe_count; j++)
+            {
+                close(pipes[j][0]);
+                close(pipes[j][1]);
+            }
+
+            // Find the end of current command
+            int j = i;
+            while (args[j] && strcmp(args[j], "|") != 0)
+                j++;
+            args[j] = NULL; // Terminate the command arguments
+
             char *cmd_path = find_command(args[i], env);
             if (cmd_path)
             {
@@ -146,31 +178,30 @@ void make_pipe(char **args, char **env)
         }
         else
         {
-            pids[pipe_count++] = pid;
-            if (has_pipe)
-            {
-                close(fd[1]);
-                if (dup2(fd[0], STDIN_FILENO) == -1)
-                {
-                    perror("dup2");
-                    exit(1);
-                }
-                close(fd[0]);
-                i = j + 1;
-            }
-            else
-            {
-                i = j;
-                break;
-            }
+            // Parent process
+            pids[cmd_index] = pid;
+
+            // Move to the next command
+            while (args[i] && strcmp(args[i], "|") != 0)
+                i++;
+            if (args[i])
+                i++; // Skip the pipe symbol
+            cmd_index++;
         }
     }
+
+    // Close all pipe file descriptors in the parent
+    for (int j = 0; j < pipe_count; j++)
+    {
+        close(pipes[j][0]);
+        close(pipes[j][1]);
+    }
+
     // Wait for all child processes to complete
-    int k = -1;
-    while (++k < pipe_count)
+    for (int k = 0; k < cmd_count; k++)
     {
         int status;
-        waitpid(pids[k],&status,0);
+        waitpid(pids[k], &status, 0);
     }
 
     // Reset standard input to the terminal
