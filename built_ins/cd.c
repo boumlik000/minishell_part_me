@@ -6,7 +6,7 @@
 /*   By: mboumlik <mboumlik@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/15 11:33:25 by mboumlik          #+#    #+#             */
-/*   Updated: 2024/09/16 13:55:44 by mboumlik         ###   ########.fr       */
+/*   Updated: 2024/09/16 16:20:02 by mboumlik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,25 +52,18 @@ int my_setenv(const char *name, const char *value, int overwrite) {
 
     return 0;
 }
+
 void command_not_found(char *cmd) {
     ft_putstr_fd("minishell: command not found: ", 2);  // 2 is the file descriptor for stderr
     ft_putstr_fd(cmd, 2);
     ft_putstr_fd("\n", 2);
 }
+
 int cd_(char **args)
 {
     char *path;
     char cwd[PATH_MAX];
-    char new_path[PATH_MAX];
-    
-    printf("%zu",ft_strlen(args[0]));
-    if (ft_strlen(args[0]) != 2)
-    {
-        
-        command_not_found(args[0]);
-        // return 1;
-    }
-    
+    char new_path[PATH_MAX];    
     // If no argument is given or the argument is NULL, change to the home directory
     if (!args[1] || args[1][0] == '\0')
     {
