@@ -24,7 +24,7 @@ typedef struct  s_shell
 
 
 
-#include "./includes/libft/libft.h"
+#include "./includes/libft1/libft.h"
 #include <readline/readline.h>
 #include <readline/history.h>
 #include <stdlib.h>

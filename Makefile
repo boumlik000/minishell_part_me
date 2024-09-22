@@ -2,7 +2,7 @@ NAME = minishell
 CC = cc
 CFLAGS = -Wall -Wextra -Werror -g3 -fsanitize=address
 # FT_PRINTF = ./ft_printf/libftprintf.a
-LIBFT = ./includes/libft/libft.a
+LIBFT = ./includes/libft1/libft.a
 
 SRCS = minishell.c\
 	free.c builts_in.c utils.c \
