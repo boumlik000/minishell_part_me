@@ -11,6 +11,8 @@ SRCS = minishell.c\
 	./built_ins/pwd.c \
 	./built_ins/env.c \
 	./built_ins/cd.c \
+	./built_ins/export.c \
+	./built_ins/unset.c \
 	./garbage_utiles.c
 
 OBJS = $(SRCS:.c=.o)

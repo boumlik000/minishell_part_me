@@ -43,6 +43,7 @@ int main(int ac, char **av, char **env)
     while(1)
     {
         char *cmd = readline(">>> ");
+        add_history(cmd);
         if (!cmd)
             break;
         
@@ -54,7 +55,8 @@ int main(int ac, char **av, char **env)
     }
 
     free_env(&shell);
+    clear_history();
     ft_garbage_free(shell.garbage);
     // rl_clear_history();
-    return 0;
+    return last_exit_status;
 }

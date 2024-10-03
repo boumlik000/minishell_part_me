@@ -6,25 +6,11 @@
 /*   By: mboumlik <mboumlik@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 08:29:48 by mboumlik          #+#    #+#             */
-/*   Updated: 2024/09/16 12:26:34 by mboumlik         ###   ########.fr       */
+/*   Updated: 2024/10/02 12:34:01 by mboumlik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
-
-int    search_in(char *str, char c)
-{
-    int    i;
-
-    i = 0;
-    while (str[i])
-    {
-        if (str[i] == c)
-            return (i);
-        i++;
-    }
-    return (i);
-}
 
 t_env *create_node(char *env)
 {

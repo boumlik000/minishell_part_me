@@ -6,7 +6,7 @@
 /*   By: mboumlik <mboumlik@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/15 11:33:25 by mboumlik          #+#    #+#             */
-/*   Updated: 2024/09/16 16:20:02 by mboumlik         ###   ########.fr       */
+/*   Updated: 2024/10/02 12:48:54 by mboumlik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,60 +14,79 @@
 
 //to look for =CHDIR/gentenv/getcwd/
 
-int my_setenv(const char *name, const char *value, int overwrite) {
-    // Get the current environment variable
-    char *current = getenv(name);
+void update_env_var(t_shell *shell, const char *key, const char *value)
+{
+    t_env *current;
+    t_env *new_node;
+    
+    if (!shell || !key || !value)
+        return;
 
-    // If the environment variable exists and overwrite is set to 0, do nothing
-    if (current && !overwrite) {
-        return 0;
+    current = shell->env;
+    
+    // Search for existing key
+    while (current)
+    {
+        if (current->key && ft_strncmp(current->key, key,-1) == 0)
+        {
+            // Free old value and update with new one
+            if (current->value)
+                free(current->value);
+            current->value = ft_strdup(value);
+            return;
+        }
+        current = current->next;
     }
-
-    // Calculate the length needed for the new environment string "NAME=VALUE"
-    size_t name_len = strlen(name);
-    size_t value_len = strlen(value);
-    size_t env_len = name_len + value_len + 2; // Extra 2 for '=' and '\0'
-
-    // Allocate space for the new environment variable
-    char *env_var = malloc(env_len);
-    if (!env_var) {
-        perror("malloc");
-        return -1;
-    }
-
-    // Construct the new environment variable "NAME=VALUE"
-    strcpy(env_var, name);  // Copy the name
-    strcat(env_var, "=");   // Append '='
-    strcat(env_var, value); // Append the value
-
-    // Add the new environment variable to the environment list using putenv
-    if (putenv(env_var) != 0) {
-        perror("putenv");
-        free(env_var);  // Free the memory if putenv fails
-        return -1;
-    }
-
-    // Memory for env_var should NOT be freed because putenv does not copy the string,
-    // it just adds it directly to the environment.
-
-    return 0;
+    
+    // If key doesn't exist, create new node
+    new_node = malloc(sizeof(t_env));
+    if (!new_node)
+        return;
+    
+    new_node->key = ft_strdup(key);
+    new_node->value = ft_strdup(value);
+    new_node->next = shell->env;
+    shell->env = new_node;
 }
 
-void command_not_found(char *cmd) {
-    ft_putstr_fd("minishell: command not found: ", 2);  // 2 is the file descriptor for stderr
-    ft_putstr_fd(cmd, 2);
-    ft_putstr_fd("\n", 2);
+char *get_env_value(t_env *env, const char *key)
+{
+    t_env *current;
+    
+    if (!env || !key)
+        return NULL;
+
+    current = env;
+    while (current)
+    {
+        if (current->key && ft_strncmp(current->key, key,-1) == 0)
+            return current->value;
+        current = current->next;
+    }
+    return NULL;
 }
 
-int cd_(char **args)
+int cd_(char **args, t_shell *shell)
 {
     char *path;
     char cwd[PATH_MAX];
+    char old_cwd[PATH_MAX];
     char new_path[PATH_MAX];    
+
+    if (!shell)
+        return 1;
+
+    // Store the current directory as OLD_PWD
+    if (getcwd(old_cwd, sizeof(old_cwd)) == NULL)
+    {
+        ft_putstr_fd("cd: Error getting current directory\n", 2);
+        return 1;
+    }
+
     // If no argument is given or the argument is NULL, change to the home directory
     if (!args[1] || args[1][0] == '\0')
     {
-        path = getenv("HOME");
+        path = get_env_value(shell->env, "HOME");
         if (!path)
         {
             ft_putstr_fd("cd: HOME not set\n", 2);
@@ -82,7 +101,7 @@ int cd_(char **args)
     // Handle ~ as home directory
     if (path[0] == '~' && (path[1] == '/' || path[1] == '\0'))
     {
-        char *home = getenv("HOME");
+        char *home = get_env_value(shell->env, "HOME");
         if (!home)
         {
             ft_putstr_fd("cd: HOME not set\n", 2);
@@ -117,14 +136,11 @@ int cd_(char **args)
         return 1;
     }
 
-    // Update PWD environment variable
+    // Update PWD and OLDPWD environment variables
     if (getcwd(cwd, sizeof(cwd)) != NULL)
     {
-        if (my_setenv("PWD", cwd, 1) != 0)
-        {
-            ft_putstr_fd("cd: Error updating PWD environment variable\n", 2);
-            return 1;
-        }
+        update_env_var(shell, "OLDPWD", old_cwd);
+        update_env_var(shell, "PWD", cwd);
     }
     else
     {
