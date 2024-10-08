@@ -19,6 +19,7 @@ typedef struct s_env
 typedef struct  s_shell
 {
     t_env *env;
+    char **env_array;
     t_garbage *garbage;
 }t_shell;
 
@@ -32,6 +33,9 @@ typedef struct  s_shell
 #include <unistd.h>
 #include <limits.h>
 #include <errno.h>
+#include <sys/wait.h>
+#include <fcntl.h>
+#include <sys/wait.h>
 
 
 
@@ -40,7 +44,7 @@ extern int last_exit_status;
 int exec_cmd(char **arr,t_shell *shell);
 int exec_built_in(char **arr,t_shell *shell);
 
-void env_(t_env *env);
+int env_(char **args, t_shell *shell);
 void free_arr(char **arr);
 int echo_(char **args);
 int exit_(char **args);
@@ -78,6 +82,13 @@ void ft_garbage_free(t_garbage *garbage);
 // void cleanup_readline();
 // int	ft_strcmp(const char *s1,const char *s2);
 
-// 
+// pipe
+void free_array(char **array);
+char *find_command(char *cmd, char **env);
+void set_dup(int has_pipe, int fd[2], int end);
+void make_pipe(char **args, t_shell *shell);
+void print_array(char **array);
+void execute_command(char **args, t_shell *shell);
+
 
 #endif

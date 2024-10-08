@@ -6,7 +6,7 @@
 /*   By: mboumlik <mboumlik@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 08:29:48 by mboumlik          #+#    #+#             */
-/*   Updated: 2024/10/02 12:34:01 by mboumlik         ###   ########.fr       */
+/*   Updated: 2024/10/03 22:39:35 by mboumlik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,14 +87,23 @@ t_env *cp_env_in_liste(char **env, t_shell *shell)
     return lst;
 }
 
-void env_(t_env *env)
+int env_(char **args,t_shell *shell)
 {
-    if (!env)
-        return ;
-    t_env *current = env;
-    while (current != NULL)
+    if (!args[1])
     {
-        printf("%s=%s\n", current->key, current->value);
-        current = current->next;
+        t_env *current = shell->env;
+        while (current != NULL)
+        {
+            printf("%s=%s\n", current->key, current->value);
+            current = current->next;
+        }
     }
+    else
+    {
+        ft_putstr_fd("env: '", 2);
+        ft_putstr_fd(args[1], 2);
+        ft_putstr_fd("': No such file or directory\n", 2);
+        return 127;
+    }
+    return 0;
 }
