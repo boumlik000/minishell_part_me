@@ -9,3 +9,4 @@ void free_arr(char **arr)
     }
     free(arr);
 }
+

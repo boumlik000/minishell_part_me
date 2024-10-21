@@ -39,35 +39,13 @@ int exec_cmd(char **arr, t_shell *shell)
     }
     else
     {
-        // Check for builtin first
-        char *builtins[] = {"pwd", "env", "echo", "exit", "cd", "export", "unset", NULL};
-        int is_builtin = 0;
-        
-        for (int i = 0; builtins[i]; i++)
-        {
-            if (ft_strcmp(arr[0], builtins[i]) == 0)
-            {
-                is_builtin = 1;
-                break;
-            }
-        }
-        if (is_builtin)
-            return exec_built_in(arr, shell);
-            
         pid_t pid = fork();
         if (pid == 0)
         {
             // Child process
-            char *cmd_path = find_command(arr[0], shell->env_array);
-            if (cmd_path)
-            {
-                execve(cmd_path, arr, shell->env_array);
-                free(cmd_path);  // Free if execve fails
-            }
-            ft_putstr_fd("minishell: command not found: ", 2);
-            ft_putstr_fd(arr[0], 2);
-            ft_putstr_fd("\n", 2);
-            exit(127);
+            execute_command(arr, shell);
+            // This should not be reached due to exit() in execute_command
+            exit(1);
         }
         else
         {

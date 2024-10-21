@@ -91,4 +91,8 @@ void print_array(char **array);
 void execute_command(char **args, t_shell *shell);
 
 
+//redirections
+// int handle_output_redirection(char **args, int *i);
+// char **process_redirections(char **args, int *has_redirection);
+
 #endif
